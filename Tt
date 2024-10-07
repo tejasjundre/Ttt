@@ -1,0 +1,79 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+typedef struct String {
+    char *str;
+} string;
+
+char *input(FILE *fp, int size) {
+    char *str = (char *)malloc(sizeof(char) * (size + 1));
+    if (str == NULL) {
+        return NULL;
+    }
+    if (fgets(str, size + 1, fp) == NULL) {
+        free(str);
+        return NULL;
+    }
+    return str;
+}
+
+typedef struct array_single_string {
+    string *data;
+    int size;
+} array_single_string;
+
+array_single_string dictWords(string textInput) {
+    array_single_string answer;
+    answer.data = NULL;
+    answer.size = 0;
+
+    // Split the input string into words
+    char *token = strtok(textInput.str, " ");
+    while (token != NULL) {
+        // Count the frequency of each word
+        bool found = false;
+        for (int i = 0; i < answer.size; i++) {
+            if (strcmp(token, answer.data[i].str) == 0) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            answer.data = realloc(answer.data, sizeof(string) * (answer.size + 1));
+            answer.data[answer.size].str = strdup(token);
+            answer.size++;
+        }
+        token = strtok(NULL, " ");
+    }
+
+    return answer;
+}
+
+int main() {
+    string textInput;
+    textInput.str = input(stdin, 6000);
+    if (textInput.str == NULL) {
+        return 1;
+    }
+
+    array_single_string result = dictWords(textInput);
+    if (result.data == NULL) {
+        return 1;
+    }
+
+    for (int idx = 0; idx < result.size - 1; idx++) {
+        printf("%s ", result.data[idx].str);
+    }
+    printf("%s\n", result.data[result.size - 1].str);
+
+    // Free the memory
+    for (int i = 0; i < result.size; i++) {
+        free(result.data[i].str);
+    }
+    free(result.data);
+    free(textInput.str);
+
+    return 0;
+}
